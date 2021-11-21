@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener(
                 imageURL = imageArray[i].dataset.src
             }
             
-            await fetch(imageURL)
+            await fetch(imageURL, {'mode': 'no-cors'})
                 .then(response => {
                     var responseSize = response.headers.get("content-length")/1024;
                     responseSize = Math.ceil(responseSize);
