@@ -47,37 +47,57 @@ chrome.runtime.onMessage.addListener(
 
             for(var i = 0; i < data.length; i++){
                 var value = data[i];
- 
-                await fetch(value.url)
-                    .then(response => {
-                        var responseSize = response.headers.get("content-length")/1024;
-                        responseSize = Math.ceil(responseSize);
 
-                        if(responseSize < 1){
-                            console.log(responseSize + " | " + value.url);
-                        }
-                        
-                        if(!isNaN(responseSize)){
-                            imageTable += `<td>${i}</td>`;
-                            imageTable += `<td>${value.url}</td>`;
-                            imageTable += `<td>${responseSize}</td>`;
-                        }
-                        else{
-                            console.log(responseSize + " | " + value.url);
+                if(value.url.substring(0, 4) !== "data"){
+                    
+                    //image grabbing with get call
+                    await fetch(value.url)
+                        .then(response => {
+
+                            //SVGs are returned as readable stream, handled in next "then"
+                            if(value.url.includes(".svg")){
+                                return response.text();
+                            }
+
+                            var responseSize = response.headers.get("content-length")/1024;
+                            responseSize = Math.ceil(responseSize);
+
+                            if(responseSize < 1){
+                                console.log(responseSize + " | " + value.url);
+                            }
+                            
+                            if(!isNaN(responseSize)){
+                                imageTable += `<td>${i}</td>`;
+                                imageTable += `<td>${value.url}</td>`;
+                                imageTable += `<td>${responseSize}</td>`;
+                            }
+                            else{
+                                console.log(responseSize + " | " + value.url);
+                                imageTable += `<td>${i}</td>`;
+                                imageTable += `<td>${value.url}</td>`;
+                                imageTable += `<td> error</td>`;
+                            }
+                        }).then(function(data) {
+                            //SVG handling, comes in as text
+                            var svgSize = new Blob([data]).size / 1024;
+                            svgSize = Math.ceil(svgSize);
+
+                            if(value.url.includes(".svg")){
+                                imageTable += `<td>${i}</td>`;
+                                imageTable += `<td>${value.url}</td>`;
+                                imageTable += `<td>${svgSize}</td>`;
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);                            
                             imageTable += `<td>${i}</td>`;
                             imageTable += `<td>${value.url}</td>`;
                             imageTable += `<td> error</td>`;
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                        imageTable += `<td>${i}</td>`;
-                        imageTable += `<td>${value.url}</td>`;
-                        imageTable += `<td> error</td>`;
-                    });                
-                
-                if ((i+1) != data.length) { 
-                    imageTable += "</tr><tr>"; 
+                        });                
+                    
+                    if ((i+1) != data.length) { 
+                        imageTable += "</tr><tr>"; 
+                    }
                 }
             }
 
