@@ -1,27 +1,36 @@
 chrome.runtime.onMessage.addListener(
-    async function(request, sender, sendResponse) {
+    function(request, sender, sendResponse) {
         var popupArrayResponse = [];
 
         var imageArray = document.getElementsByTagName("img");
-        for(var i = 0; i < imageArray.length; i++){
-            
-            var imageURL = imageArray[i].src;
+        var imageArrayLen = imageArray.length;
 
-            if(imageURL === ''){
-                imageURL = imageArray[i].dataset.src
-            }
+        for(var i = 0; i < imageArrayLen; i++){
             
-            await fetch(imageURL, {'mode': 'no-cors'})
-                .then(response => {
-                    var responseSize = response.headers.get("content-length")/1024;
-                    responseSize = Math.ceil(responseSize);
-                    
-                    popupArrayResponse.push({
-                        url: imageURL,
-                        index: (i+1),
-                        size: responseSize
-                    });
+            var imageURLArray = [
+                imageArray[i].src,
+                imageArray[i].dataset.src,
+                imageArray[i].dataset.lazyLoadImage
+            ]
+
+            //remove duplicate urls from different sources
+            var uniqueURLArray = [];
+            for(var j = 0; j < imageURLArray.length; j++){
+                if(uniqueURLArray.indexOf(imageURLArray[j]) == -1){
+                    uniqueURLArray.push(imageURLArray[j])
+                }
+            }
+
+            //remove undefined's
+            uniqueURLArray = uniqueURLArray.filter(function( element ) {
+                return element !== undefined;
+            });
+
+            for(var j = 0; j < uniqueURLArray.length; j++){
+                popupArrayResponse.push({
+                    url: uniqueURLArray[j]
                 });
+            }
         }
 
         chrome.runtime.sendMessage({ 

@@ -32,7 +32,7 @@ function sendMessage(){
 }
 
 chrome.runtime.onMessage.addListener(
-    function(request, sender) {
+    async function(request, sender) {
         var getImageInfoButton = document.getElementsByClassName('get-image-info-button')[0];
         
         if(sender.tab.active === true){
@@ -45,15 +45,41 @@ chrome.runtime.onMessage.addListener(
             imageTable += `<th class="sorting">Size (kb)</th>`;
             imageTable += "</tr></thead><tbody><tr>";
 
-            data.forEach((value, i) => {
-                imageTable += `<td>${value.index}</td>`;
-                imageTable += `<td>${value.url}</td>`;
-                imageTable += `<td>${value.size}</td>`;
+            for(var i = 0; i < data.length; i++){
+                var value = data[i];
+ 
+                await fetch(value.url)
+                    .then(response => {
+                        var responseSize = response.headers.get("content-length")/1024;
+                        responseSize = Math.ceil(responseSize);
+
+                        if(responseSize < 1){
+                            console.log(responseSize + " | " + value.url);
+                        }
+                        
+                        if(!isNaN(responseSize)){
+                            imageTable += `<td>${i}</td>`;
+                            imageTable += `<td>${value.url}</td>`;
+                            imageTable += `<td>${responseSize}</td>`;
+                        }
+                        else{
+                            console.log(responseSize + " | " + value.url);
+                            imageTable += `<td>${i}</td>`;
+                            imageTable += `<td>${value.url}</td>`;
+                            imageTable += `<td> error</td>`;
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        imageTable += `<td>${i}</td>`;
+                        imageTable += `<td>${value.url}</td>`;
+                        imageTable += `<td> error</td>`;
+                    });                
                 
                 if ((i+1) != data.length) { 
                     imageTable += "</tr><tr>"; 
                 }
-            });
+            }
 
             imageTable += "</tr><tbody></table>";
             document.getElementById("image-list-container").innerHTML = imageTable;
@@ -125,18 +151,19 @@ chrome.runtime.onMessage.addListener(
                 var dir
                 
                 while (order && result === 0) {
-                dir = order.dir === 'desc' ? -1 : 1
-                aText = a.cells[order.idx].textContent.trim()
-                bText = b.cells[order.idx].textContent.trim()
+                    dir = order.dir === 'desc' ? -1 : 1
 
-                if (isNumeric(aText) && isNumeric(bText)) {
-                    result = dir * (parseFloat(aText) - parseFloat(bText))
-                } else {
-                    result = dir * aText.localeCompare(bText)
-                }
-                
-                i += 1
-                order = ordering[i]
+                    aText = a.cells[order.idx].textContent
+                    bText = b.cells[order.idx].textContent
+
+                    if (isNumeric(aText) && isNumeric(bText)) {
+                        result = dir * (parseFloat(aText) - parseFloat(bText))
+                    } else {
+                        result = dir * aText.localeCompare(bText)
+                    }
+                    
+                    i += 1
+                    order = ordering[i]
                 }
                 
                 return result
