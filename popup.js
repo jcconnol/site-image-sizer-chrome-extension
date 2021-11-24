@@ -5,12 +5,10 @@ window.addEventListener('load', function(event){
     )
 });
 
-//TODO listen for image array once code in content.js is done executing
 function sendMessage(){
     var getImageInfoButton = document.getElementsByClassName('get-image-info-button')[0];
 
     getImageInfoButton.addEventListener('click', function() {
-
         getImageInfoButton.disabled = true;
 
         var params = {
@@ -34,8 +32,11 @@ function sendMessage(){
 chrome.runtime.onMessage.addListener(
     async function(request, sender) {
         var getImageInfoButton = document.getElementsByClassName('get-image-info-button')[0];
-        
+
         if(sender.tab.active === true){
+            getImageInfoButton.disabled = true;
+            var progressBar = document.getElementById("inner-prog-bar");            
+
             //TODO save to browser
             var data = request.imgsArray
             
@@ -46,6 +47,16 @@ chrome.runtime.onMessage.addListener(
             imageTable += "</tr></thead><tbody><tr>";
 
             for(var i = 0; i < data.length; i++){
+                var progressWidth = (i/(data.length))*100;
+                progressWidth = Math.ceil(progressWidth);
+
+                if(i === (data.length-1)){
+                    progressWidth = 100;
+                }
+
+                progressBar.style.width = progressWidth + '%'; 
+                progressBar.innerHTML = progressWidth * 1  + '%';
+
                 var value = data[i];
 
                 if(value.url.substring(0, 4) !== "data"){
@@ -107,12 +118,10 @@ chrome.runtime.onMessage.addListener(
 
         var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
 
-        
-
         initSortTable(document.querySelector('table'))
 
         getImageInfoButton.disabled = false;
-    
+        
 
         //Helper functions for sorting
         function isNumeric (value) {

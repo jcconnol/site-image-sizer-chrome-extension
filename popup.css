@@ -13,8 +13,26 @@ h3 {
     margin-left: 10px;
 }
 
+.interaction-container {
+    display: flex;
+}
+
 .get-image-info-button {
-    margin-left: 25px;
+    margin: 0 15px 0 15px;
+    flex: 30%;
+}
+
+#progress-bar {
+    flex: 70%;
+    margin: 0 5px 0 5px;
+    background-color: lightgray;
+}
+  
+#inner-prog-bar {
+    width: 1%;
+    height: 30px;
+    background-color: gray;
+    padding-left: 5px;
 }
 
 #image-list-container {
