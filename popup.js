@@ -9,7 +9,7 @@ function sendMessage(){
     var getImageInfoButton = document.getElementsByClassName('get-image-info-button')[0];
 
     getImageInfoButton.addEventListener('click', function() {
-        getImageInfoButton.disabled = true;
+        getImageInfoButton.diabled = true;
 
         var params = {
             active: true,

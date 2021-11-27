@@ -11,25 +11,48 @@ chrome.runtime.onMessage.addListener(
                 imageArray[i].src,
                 imageArray[i].dataset.src,
                 imageArray[i].dataset.lazyLoadImage
-            ]
+            ];
 
-            //remove duplicate urls from different sources
-            var uniqueURLArray = [];
-            for(var j = 0; j < imageURLArray.length; j++){
-                if(uniqueURLArray.indexOf(imageURLArray[j]) == -1){
-                    uniqueURLArray.push(imageURLArray[j])
-                }
-            }
-
-            //remove undefined's
-            uniqueURLArray = uniqueURLArray.filter(function( element ) {
-                return element !== undefined;
-            });
+            var uniqueURLArray = formatArray(imageURLArray);
 
             for(var j = 0; j < uniqueURLArray.length; j++){
+
                 popupArrayResponse.push({
                     url: uniqueURLArray[j]
                 });
+            }
+        }
+
+        var styleArray = document.getElementsByTagName("style");
+        var styleArrayLen = styleArray.length;
+
+        for(var i = 0; i < styleArrayLen; i++){
+            var styleURLArray = styleArray[i].textContent.match(/url\(([^;]*)\)/gm);
+            var uniqueURLArray = formatArray(styleURLArray);
+
+            if(uniqueURLArray.length > 0){
+                for(var j = 0; j < uniqueURLArray.length; j++){
+                    var uniqueURL = uniqueURLArray[j];
+                    if(uniqueURL && !uniqueURL.startsWith("data")){
+
+                        if(uniqueURL.startsWith("url(")){
+                            //removes "url(" and ")" from beginning and end
+                            uniqueURL = uniqueURL.slice(4, -1);
+                        }
+
+                        if(uniqueURL.startsWith("\"") || uniqueURL.startsWith("'")){
+                            uniqueURL = uniqueURL.slice(1, -1);
+                        }
+
+                        if(uniqueURL.slice(-1) === "\"" || uniqueURL.slice(-1) === "'"){
+                            uniqueURL = uniqueURL.slice(0, -2);
+                        }
+
+                        popupArrayResponse.push({
+                            url: uniqueURL
+                        });
+                    }
+                }
             }
         }
 
@@ -41,3 +64,32 @@ chrome.runtime.onMessage.addListener(
         return true;
     }
   );
+
+function formatArray(array){
+    //remove duplicate urls from different sources
+    if(!array || array.length < 1){
+        return [];
+    }
+
+    var uniqueArray = [];
+    for(var j = 0; j < array.length; j++){
+        if(uniqueArray.indexOf(array[j]) == -1){
+            uniqueArray.push(array[j])
+        }
+    }
+
+    //remove undefined's
+    uniqueArray = uniqueArray.filter(function( element ) {
+        if(element == undefined){
+            return false;
+        }
+
+        if(element.trim() === ""){
+            return false;
+        }
+
+        return true;
+    });
+
+    return uniqueArray;
+}
