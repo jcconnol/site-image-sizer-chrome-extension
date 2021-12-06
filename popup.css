@@ -2,15 +2,27 @@ body {
     width: 35em;
 }
 
+.image-sizer-logo {
+    height: 150px;
+    width: 160px;
+    float: right;
+    padding: 10px;
+}
+
 h1 {
-    padding-top: 20px;
+    padding-top: 10px;
     font-size: xx-large;
     margin-left: 10px;
 }
   
 h3 {
-    font-size: medium;
+    font-size: 14px;
     margin-left: 10px;
+    padding-top: 5px;
+}
+
+hr {
+    margin-right: 100px;
 }
 
 .interaction-container {
