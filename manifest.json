@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Page Image Sizer",
-    "description": "This simply lists out all the images and their weights on the page.",
+    "description": "Get image weight insights at the click of a button on the website you're currently on.",
     "version": "1.0",
     "author": "John Connolly",
     "content_scripts": [
