@@ -39,7 +39,6 @@ function sendMessage(){
         });
 
     }, false);
-  
 }
 
 chrome.runtime.onMessage.addListener(
@@ -50,27 +49,20 @@ chrome.runtime.onMessage.addListener(
             getImageInfoButton.disabled = true;
             var progressBar = document.getElementById("inner-prog-bar");            
 
-            //TODO save to browser
-            var data = request.imgsArray
-            
-            var imageTable = "<table><thead><tr class=\"image-table-header\">";
-            imageTable += `<th class="sorting"></th>`;
-            imageTable += `<th class="sorting">URL</th>`;
-            imageTable += `<th class="sorting">Size (kb)</th>`;
-            imageTable += "</tr></thead><tbody><tr>";
+            var imageData = request.imgsArray
 
-            for(var i = 0; i < data.length; i++){
-                var progressWidth = (i/(data.length))*100;
+            for(var i = 0; i < imageData.length; i++){
+                var progressWidth = (i/(imageData.length))*100;
                 progressWidth = Math.ceil(progressWidth);
 
-                if(i === (data.length-1)){
+                if(i === (imageData.length-1)){
                     progressWidth = 100;
                 }
 
                 progressBar.style.width = progressWidth + '%'; 
                 progressBar.innerHTML = progressWidth * 1  + '%';
 
-                var value = data[i];
+                var value = imageData[i];
 
                 if(value.url.substring(0, 4) !== "data"){
                     
@@ -85,46 +77,63 @@ chrome.runtime.onMessage.addListener(
 
                             var responseSize = response.headers.get("content-length")/1024;
                             responseSize = Math.ceil(responseSize);
-
-                            if(responseSize < 1){
-                                console.log(responseSize + " | " + value.url);
-                            }
                             
                             if(!isNaN(responseSize)){
-                                imageTable += `<td>${i}</td>`;
-                                imageTable += `<td>${value.url}</td>`;
-                                imageTable += `<td>${responseSize}</td>`;
-                            }
-                            else{
-                                console.log(responseSize + " | " + value.url);
-                                imageTable += `<td>${i}</td>`;
-                                imageTable += `<td>${value.url}</td>`;
-                                imageTable += `<td> error</td>`;
-                            }
-                        }).then(function(data) {
-                            //SVG handling, comes in as text
-                            var svgSize = new Blob([data]).size / 1024;
-                            svgSize = Math.ceil(svgSize);
+                                imageData[i].size = responseSize;
 
+                                if(responseSize < 1){
+                                    imageData[i].size = 0;
+                                }
+                            }
+
+                        }).then(function(data) {
+
+                            //SVG handling, comes in as text
                             if(value.url.includes(".svg")){
-                                imageTable += `<td>${i}</td>`;
-                                imageTable += `<td>${value.url}</td>`;
-                                imageTable += `<td>${svgSize}</td>`;
+                                var svgSize = new Blob([data]).size / 1024;
+                                svgSize = Math.ceil(svgSize);
+                                imageData[i].size = svgSize;
                             }
                         })
                         .catch(error => {
-                            console.log(error);                            
-                            imageTable += `<td>${i}</td>`;
-                            imageTable += `<td>${value.url}</td>`;
-                            imageTable += `<td> error</td>`;
-                        });                
-                    
-                    if ((i+1) != data.length) { 
-                        imageTable += "</tr><tr>"; 
-                    }
+                            console.log(error);
+                        });
+                }
+
+                if(imageData[i].size == null){
+                    imageData[i].size = -1;
                 }
             }
 
+            //sort data array by size
+            console.log(imageData);
+            var sortedImageData = imageData.sort((a, b) => parseInt(b.size) - parseInt(a.size));
+            console.log(imageData);
+
+            var imageTable = "<table><thead><tr class=\"image-table-header\">";
+            imageTable += `<th class="sorting"></th>`;
+            imageTable += `<th class="sorting">URL</th>`;
+            imageTable += `<th class="sorting">Size (kb)</th>`;
+            imageTable += "</tr></thead><tbody><tr>";
+
+            for(var i = 0; i < sortedImageData.length; i++){
+                var value = sortedImageData[i];
+
+                imageTable += `<td>${i}</td>`;
+                imageTable += `<td>${value.url}</td>`;
+
+                if(value.size > 0 && value.size){
+                    imageTable += `<td>${value.size}</td>`;
+                }
+                else{
+                    imageTable += `<td> error</td>`;
+                }
+
+                if ((i+1) != imageData.length) { 
+                    imageTable += "</tr><tr>"; 
+                }
+            }
+            
             imageTable += "</tr><tbody></table>";
             document.getElementById("image-list-container").innerHTML = imageTable;
         }
@@ -135,7 +144,6 @@ chrome.runtime.onMessage.addListener(
 
         getImageInfoButton.disabled = false;
         
-
         //Helper functions for sorting
         function isNumeric (value) {
             return numericRegExp.test(String(value))
@@ -222,7 +230,6 @@ chrome.runtime.onMessage.addListener(
             var thead = table.querySelector('thead')
             var ordering = [{idx:2,dir:'asc'},{idx:1,dir:'asc'}]
             
-            sortTable(table, ordering)
             table.__ordering = ordering
             
             thead.addEventListener('click', function onClick (event) {
