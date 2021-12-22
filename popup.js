@@ -106,9 +106,7 @@ chrome.runtime.onMessage.addListener(
             }
 
             //sort data array by size
-            console.log(imageData);
             var sortedImageData = imageData.sort((a, b) => parseInt(b.size) - parseInt(a.size));
-            console.log(imageData);
 
             var imageTable = "<table><thead><tr class=\"image-table-header\">";
             imageTable += `<th class="sorting"></th>`;
