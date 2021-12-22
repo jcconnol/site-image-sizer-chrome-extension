@@ -1,8 +1,9 @@
 {
     "manifest_version": 2,
-    "name": "Site Image Size",
-    "description": "This Chrome extension reads a site, lists out all the images and their weights. This is to help improve Core Web Vitals on your site.",
+    "name": "Page Image Sizer",
+    "description": "This simply lists out all the images and their weights on the page.",
     "version": "1.0",
+    "author": "John Connolly",
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
@@ -17,12 +18,11 @@
     },
     "permissions": [
         "tabs",
-        "activeTab",
-        "storage"
+        "activeTab"
     ],
     "icons": { 
-        "16": "images/icon.png",
-        "48": "images/icon.png",
-        "128": "images/icon.png"
+        "16": "images/icon16.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
     }
   }

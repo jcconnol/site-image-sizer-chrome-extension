@@ -25,6 +25,10 @@ hr {
     margin-right: 100px;
 }
 
+footer hr{
+    margin-right: 0;
+}
+
 .interaction-container {
     display: flex;
 }
@@ -99,4 +103,26 @@ tr:nth-child(even) {
 
 .sorting_desc {
   background-image: url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIPnI+py+0/hJzz0IruwjsVADs=);
+}
+
+footer {
+    font-size: small;
+    text-align: center;
+    margin-bottom: 5%;
+    margin-top: 9%;
+}
+
+.footer-helper {
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-helper span{
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0% 3% 2% 3%;
 }

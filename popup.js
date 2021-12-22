@@ -5,11 +5,24 @@ window.addEventListener('load', function(event){
     )
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    var links = document.getElementsByName("newtab");
+    for (var i = 0; i < links.length; i++) {
+        (function () {
+            var ln = links[i];
+            var location = ln.href;
+            ln.onclick = function () {
+                chrome.tabs.create({active: true, url: location});
+            };
+        })();
+    }
+});
+
 function sendMessage(){
     var getImageInfoButton = document.getElementsByClassName('get-image-info-button')[0];
 
     getImageInfoButton.addEventListener('click', function() {
-        getImageInfoButton.diabled = true;
+        getImageInfoButton.disabled = true;
 
         var params = {
             active: true,
