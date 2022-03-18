@@ -16,10 +16,11 @@ chrome.runtime.onMessage.addListener(
             var uniqueURLArray = formatArray(imageURLArray);
 
             for(var j = 0; j < uniqueURLArray.length; j++){
-
-                popupArrayResponse.push({
-                    url: uniqueURLArray[j]
-                });
+                if(!uniqueURLArray[j].startsWith("data")){
+                    popupArrayResponse.push({
+                        url: uniqueURLArray[j]
+                    });
+                }
             }
         }
 
@@ -27,14 +28,13 @@ chrome.runtime.onMessage.addListener(
         var styleArrayLen = styleArray.length;
 
         for(var i = 0; i < styleArrayLen; i++){
-            var styleURLArray = styleArray[i].textContent.match(/url\(([^;]*)\)/gm);
+            var styleURLArray = styleArray[i].textContent.match(/url\(([^;\)])*\)/gm);
             var uniqueURLArray = formatArray(styleURLArray);
 
             if(uniqueURLArray.length > 0){
                 for(var j = 0; j < uniqueURLArray.length; j++){
                     var uniqueURL = uniqueURLArray[j];
                     if(uniqueURL && !uniqueURL.startsWith("data")){
-
                         if(uniqueURL.startsWith("url(")){
                             //removes "url(" and ")" from beginning and end
                             uniqueURL = uniqueURL.slice(4, -1);

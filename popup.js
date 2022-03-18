@@ -117,7 +117,7 @@ chrome.runtime.onMessage.addListener(
             for(var i = 0; i < sortedImageData.length; i++){
                 var value = sortedImageData[i];
 
-                imageTable += `<td>${i}</td>`;
+                imageTable += `<td>${i+1}</td>`;
                 imageTable += `<td>${value.url}</td>`;
 
                 if(value.size > 0 && value.size){
