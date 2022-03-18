@@ -16,11 +16,9 @@ chrome.runtime.onMessage.addListener(
             var uniqueURLArray = formatArray(imageURLArray);
 
             for(var j = 0; j < uniqueURLArray.length; j++){
-                if(!uniqueURLArray[j].startsWith("data")){
-                    popupArrayResponse.push({
-                        url: uniqueURLArray[j]
-                    });
-                }
+                popupArrayResponse.push({
+                    url: uniqueURLArray[j]
+                });
             }
         }
 
@@ -56,6 +54,8 @@ chrome.runtime.onMessage.addListener(
             }
         }
 
+        console.log(popupArrayResponse)
+
         chrome.runtime.sendMessage({ 
             action: "show", 
             imgsArray: popupArrayResponse
@@ -63,7 +63,7 @@ chrome.runtime.onMessage.addListener(
         
         return true;
     }
-  );
+);
 
 function formatArray(array){
     //remove duplicate urls from different sources
@@ -85,6 +85,14 @@ function formatArray(array){
         }
 
         if(element.trim() === ""){
+            return false;
+        }
+
+        if(element.includes("data:image/")){
+            return false;
+        }
+
+        if(element.includes(".woff2") || element.includes(".woff")){
             return false;
         }
 
