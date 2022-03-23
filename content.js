@@ -54,8 +54,6 @@ chrome.runtime.onMessage.addListener(
             }
         }
 
-        console.log(popupArrayResponse)
-
         chrome.runtime.sendMessage({ 
             action: "show", 
             imgsArray: popupArrayResponse
