@@ -1,17 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.sync.get(["imageArray"], function(result) {
-        //console.log("result here" + JSON.stringify(result));
+    chrome.storage.sync.get(["imageArray"], async function(result) {
         var getImageInfoButton = document.getElementsByClassName('get-image-info-button')[0];
+        var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
 
         if(result.imageArray.length > 0){
-            //TODO run function to generate table out of array data
-            //console.log('Loaded data');
-            var imageTable = buildTableFromData(result.imageArray);
-            //console.log(imageTable);
+            //TODO save URL in object and if saved URL = current URL then output 
+            var imageTable = await buildTableFromData(result.imageArray);
+            console.log(imageTable);
             document.getElementById("image-list-container").innerHTML = imageTable;
-
-            var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
-
+            
             initSortTable(document.querySelector('table'))
 
             getImageInfoButton.disabled = false;
@@ -76,6 +73,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 while (order && result === 0) {
                     dir = order.dir === 'desc' ? -1 : 1
 
+                    if(!('textContent' in a.cells[order.idx])){
+                        break;
+                    }
+
+                    if(!('textContent' in b.cells[order.idx])){
+                        break;
+                    }
+                    
                     aText = a.cells[order.idx].textContent
                     bText = b.cells[order.idx].textContent
 
@@ -180,12 +185,6 @@ chrome.runtime.onMessage.addListener(
         if(sender.tab.active === true){
             getImageInfoButton.disabled = true;
 
-            console.log(request);
-
-            // chrome.storage.sync.set({"imageArray": popupArrayResponse}, function() {
-            //     console.log('set');
-            // });
-
             var progressBar = document.getElementById("inner-prog-bar");            
 
             var imageData = request.imgsArray
@@ -247,11 +246,9 @@ chrome.runtime.onMessage.addListener(
             //sort data array by size
             var sortedImageData = imageData.sort((a, b) => parseInt(b.size) - parseInt(a.size));
 
-            chrome.storage.sync.set({"imageArray": sortedImageData}, function() {
-                console.log('set');
-            });
-
-            var imageTable = buildTableFromData(sortedImageData);
+            chrome.storage.sync.set({"imageArray": sortedImageData}, function() {});
+            var imageTable = await buildTableFromData(sortedImageData);
+            console.log(imageTable)
 
             document.getElementById("image-list-container").innerHTML = imageTable;
         }
@@ -289,7 +286,7 @@ chrome.runtime.onMessage.addListener(
             var rows = toArray(tbody.rows)
             var headers = toArray(thead.rows[0].cells)
 
-            var current = toArray(thead.querySelectorAll('.sorting_desc, .sorting_asc'))
+            var current = toArray(thead.querySelector('.sorting_desc, .sorting_asc'))
             
             current.filter(function (item) { return !!item }).forEach(function (item) {
                 item.classList.remove('sorting_desc')
@@ -310,6 +307,7 @@ chrome.runtime.onMessage.addListener(
             })
             
             rows.sort(function sorter (a, b) {
+
                 var i = 0
                 var order = ordering[i]
                 var length = ordering.length
@@ -320,6 +318,14 @@ chrome.runtime.onMessage.addListener(
                 
                 while (order && result === 0) {
                     dir = order.dir === 'desc' ? -1 : 1
+
+                    if(!a.cells[order.idx]){
+                        break;
+                    }
+
+                    if(!b.cells[order.idx]){
+                        break;
+                    }
 
                     aText = a.cells[order.idx].textContent
                     bText = b.cells[order.idx].textContent
@@ -344,7 +350,7 @@ chrome.runtime.onMessage.addListener(
             return toArray(array).filter(predicate)[0]
         }
 
-        function initSortTable (table) {
+        function initSortTable(table) {
             var thead = table.querySelector('thead')
             var ordering = [{idx:2,dir:'asc'},{idx:1,dir:'asc'}]
             
@@ -355,29 +361,29 @@ chrome.runtime.onMessage.addListener(
                 var tagName = src.tagName.toLowerCase()
                 
                 if (tagName !== 'th') {
-                return
+                    return
                 }
                 
                 if (!event.shiftKey) {
-                table.__ordering = [
-                    {
-                    idx: src.cellIndex,
-                    dir: src.classList.contains('sorting_asc') ? 'desc' : 'asc'
-                    }
-                ]
+                    table.__ordering = [
+                        {
+                        idx: src.cellIndex,
+                        dir: src.classList.contains('sorting_asc') ? 'desc' : 'asc'
+                        }
+                    ]
                 } else {
-                var order = find(table.__ordering, function (item) {
-                    return item.idx === src.cellIndex
-                })
-                
-                if (order) {
-                    order.dir = order.dir === 'asc' ? 'desc' : 'asc'
-                } else {
-                    table.__ordering.push({
-                    idx: src.cellIndex,
-                    dir: 'asc'
+                    var order = find(table.__ordering, function (item) {
+                        return item.idx === src.cellIndex
                     })
-                }
+                
+                    if (order) {
+                        order.dir = order.dir === 'asc' ? 'desc' : 'asc'
+                    } else {
+                        table.__ordering.push({
+                            idx: src.cellIndex,
+                            dir: 'asc'
+                        })
+                    }
                 }
                 
                 sortTable(table, table.__ordering)
@@ -406,8 +412,8 @@ function buildTableFromData(tableArray){
             buildTable += `<td> error</td>`;
         }
 
-        if ((i+1) != buildTable.length) { 
-            buildTable += "</tr><tr>"; 
+        if ((i+1) < buildTable.length) { 
+            buildTable += "</tr><tr>";
         }
     }
     
