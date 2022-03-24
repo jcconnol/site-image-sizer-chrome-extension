@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if(result.imageArray.length > 0){
             //TODO save URL in object and if saved URL = current URL then output 
-            var imageTable = await buildTableFromData(result.imageArray);
-            console.log(imageTable);
+            var imageTable = buildTableFromData(result.imageArray);
+
             document.getElementById("image-list-container").innerHTML = imageTable;
             
             initSortTable(document.querySelector('table'))
@@ -247,7 +247,7 @@ chrome.runtime.onMessage.addListener(
             var sortedImageData = imageData.sort((a, b) => parseInt(b.size) - parseInt(a.size));
 
             chrome.storage.sync.set({"imageArray": sortedImageData}, function() {});
-            var imageTable = await buildTableFromData(sortedImageData);
+            var imageTable = buildTableFromData(sortedImageData);
             console.log(imageTable)
 
             document.getElementById("image-list-container").innerHTML = imageTable;
