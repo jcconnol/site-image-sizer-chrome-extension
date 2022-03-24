@@ -1,18 +1,30 @@
 document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.sync.get(["imageArray"], async function(result) {
+    chrome.storage.sync.get(["pageObject"], async function(result) {
         var getImageInfoButton = document.getElementsByClassName('get-image-info-button')[0];
         var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
 
-        if(result.imageArray.length > 0){
-            //TODO save URL in object and if saved URL = current URL then output 
-            var imageTable = buildTableFromData(result.imageArray);
+        var currentURL = null;
 
-            document.getElementById("image-list-container").innerHTML = imageTable;
-            
-            initSortTable(document.querySelector('table'))
+        chrome.tabs.query({active: true, currentWindow: true},function(tabs){   
+            currentURL = tabs[0].url;
 
-            getImageInfoButton.disabled = false;
-        }
+            //remove params for more consistency
+            if(currentURL){
+                if(currentURL.indexOf('?') > 0){
+                    currentURL = currentURL.substring(0, currentURL.indexOf('?'))
+                }
+            }
+
+            if(result.pageObject.imageArray.length > 0 && currentURL == result.pageObject.url){
+                var imageTable = buildTableFromData(result.pageObject.imageArray);
+
+                document.getElementById("image-list-container").innerHTML = imageTable;
+
+                initSortTable(document.querySelector('table'))
+
+                getImageInfoButton.disabled = false;
+            }
+        });
         
         //Helper functions for sorting
         function isNumeric (value) {
@@ -246,11 +258,25 @@ chrome.runtime.onMessage.addListener(
             //sort data array by size
             var sortedImageData = imageData.sort((a, b) => parseInt(b.size) - parseInt(a.size));
 
-            chrome.storage.sync.set({"imageArray": sortedImageData}, function() {});
-            var imageTable = buildTableFromData(sortedImageData);
-            console.log(imageTable)
+            await chrome.tabs.query({active: true, currentWindow: true}, async function(tabs){   
+                var currentURL = tabs[0].url;
+            
+                if(currentURL){
+                    if(currentURL.indexOf('?') > 0){
+                       currentURL = currentURL.substring(0, currentURL.indexOf('?'));
+                    }
+                }
+                
+                var pageObject = {
+                    "imageArray": sortedImageData,
+                    "url": currentURL
+                }
 
-            document.getElementById("image-list-container").innerHTML = imageTable;
+                await chrome.storage.sync.set({"pageObject": pageObject}, function() {
+                    var imageTable = buildTableFromData(sortedImageData);
+                    document.getElementById("image-list-container").innerHTML = imageTable;
+                });
+            });
         }
 
         var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
