@@ -1,19 +1,16 @@
+var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
+
+
 document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.sync.get(["pageObject"], async function(result) {
         var getImageInfoButton = document.getElementsByClassName('get-image-info-button')[0];
-        var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
+
+        //var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
 
         var currentURL = null;
 
-        chrome.tabs.query({active: true, currentWindow: true},function(tabs){   
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
             currentURL = tabs[0].url;
-
-            //remove params for more consistency
-            if(currentURL){
-                if(currentURL.indexOf('?') > 0){
-                    currentURL = currentURL.substring(0, currentURL.indexOf('?'))
-                }
-            }
 
             if(result.pageObject.imageArray.length > 0 && currentURL == result.pageObject.url){
                 var imageTable = buildTableFromData(result.pageObject.imageArray);
@@ -48,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function sortTable (table, ordering) {
+            console.log("first table")
             var thead = table.querySelector('thead')
             var tbody = table.querySelector('tbody')
             var rows = toArray(tbody.rows)
@@ -85,13 +83,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 while (order && result === 0) {
                     dir = order.dir === 'desc' ? -1 : 1
 
-                    if(!('textContent' in a.cells[order.idx])){
+
+                    if(!a.cells[order.idx]){
                         break;
                     }
 
-                    if(!('textContent' in b.cells[order.idx])){
+                    if(!b.cells[order.idx]){
                         break;
                     }
+
+                    // if(!('textContent' in a.cells[order.idx])){
+                    //     break;
+                    // }
+
+                    // if(!('textContent' in b.cells[order.idx])){
+                    //     break;
+                    // }
                     
                     aText = a.cells[order.idx].textContent
                     bText = b.cells[order.idx].textContent
@@ -260,30 +267,28 @@ chrome.runtime.onMessage.addListener(
 
             await chrome.tabs.query({active: true, currentWindow: true}, async function(tabs){   
                 var currentURL = tabs[0].url;
-            
-                if(currentURL){
-                    if(currentURL.indexOf('?') > 0){
-                       currentURL = currentURL.substring(0, currentURL.indexOf('?'));
-                    }
-                }
                 
                 var pageObject = {
                     "imageArray": sortedImageData,
                     "url": currentURL
                 }
 
-                await chrome.storage.sync.set({"pageObject": pageObject}, function() {
+                chrome.storage.sync.set({"pageObject": pageObject}, function() {
                     var imageTable = buildTableFromData(sortedImageData);
                     document.getElementById("image-list-container").innerHTML = imageTable;
+
+                    initSortTable(document.querySelector('table'))
+
+                    getImageInfoButton.disabled = false;
                 });
             });
         }
 
         var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
 
-        initSortTable(document.querySelector('table'))
+        // initSortTable(document.querySelector('table'))
 
-        getImageInfoButton.disabled = false;
+        // getImageInfoButton.disabled = false;
         
         //Helper functions for sorting
         function isNumeric (value) {
@@ -307,12 +312,13 @@ chrome.runtime.onMessage.addListener(
         }
 
         function sortTable (table, ordering) {
+            console.log("second table")
             var thead = table.querySelector('thead')
             var tbody = table.querySelector('tbody')
             var rows = toArray(tbody.rows)
             var headers = toArray(thead.rows[0].cells)
 
-            var current = toArray(thead.querySelector('.sorting_desc, .sorting_asc'))
+            var current = toArray(thead.querySelectorAll('.sorting_desc, .sorting_asc'))
             
             current.filter(function (item) { return !!item }).forEach(function (item) {
                 item.classList.remove('sorting_desc')
@@ -333,7 +339,6 @@ chrome.runtime.onMessage.addListener(
             })
             
             rows.sort(function sorter (a, b) {
-
                 var i = 0
                 var order = ordering[i]
                 var length = ordering.length
@@ -345,6 +350,7 @@ chrome.runtime.onMessage.addListener(
                 while (order && result === 0) {
                     dir = order.dir === 'desc' ? -1 : 1
 
+
                     if(!a.cells[order.idx]){
                         break;
                     }
@@ -353,6 +359,14 @@ chrome.runtime.onMessage.addListener(
                         break;
                     }
 
+                    // if(!('textContent' in a.cells[order.idx])){
+                    //     break;
+                    // }
+
+                    // if(!('textContent' in b.cells[order.idx])){
+                    //     break;
+                    // }
+                    
                     aText = a.cells[order.idx].textContent
                     bText = b.cells[order.idx].textContent
 

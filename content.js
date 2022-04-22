@@ -6,11 +6,11 @@ chrome.runtime.onMessage.addListener(
         var imageArrayLen = imageArray.length;
 
         for(var i = 0; i < imageArrayLen; i++){
-            
+
             var imageURLArray = [
-                imageArray[i].src,
-                imageArray[i].dataset.src,
-                imageArray[i].dataset.lazyLoadImage
+                removeURLParameters(imageArray[i].src),
+                removeURLParameters(imageArray[i].dataset.src),
+                removeURLParameters(imageArray[i].dataset.lazyLoadImage)
             ];
 
             var uniqueURLArray = formatArray(imageURLArray);
@@ -98,4 +98,15 @@ function formatArray(array){
     });
 
     return uniqueArray;
+}
+
+function removeURLParameters(url){
+    if(url){
+        if(url.indexOf('?') > 0){
+            return url.substring(0, url.indexOf('?'))
+        }
+    }
+    else {
+        return null
+    }
 }
