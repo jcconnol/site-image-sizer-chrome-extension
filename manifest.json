@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Page Image Sizer",
     "description": "Get image weight insights at the click of a button on the website you're currently on.",
-    "version": "1.1",
+    "version": "2.0",
     "author": "John Connolly",
     "content_scripts": [
         {
