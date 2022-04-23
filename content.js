@@ -8,9 +8,9 @@ chrome.runtime.onMessage.addListener(
         for(var i = 0; i < imageArrayLen; i++){
 
             var imageURLArray = [
-                removeURLParameters(imageArray[i].src),
-                removeURLParameters(imageArray[i].dataset.src),
-                removeURLParameters(imageArray[i].dataset.lazyLoadImage)
+                imageArray[i].src,
+                imageArray[i].dataset.src,
+                imageArray[i].dataset.lazyLoadImage
             ];
 
             var uniqueURLArray = formatArray(imageURLArray);

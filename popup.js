@@ -1,6 +1,5 @@
 var numericRegExp = new RegExp('^((?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity)))$')
 
-
 document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.sync.get(["pageObject"], async function(result) {
         var getImageInfoButton = document.getElementsByClassName('get-image-info-button')[0];
@@ -113,7 +112,7 @@ chrome.runtime.onMessage.addListener(
                     var imageTable = buildTableFromData(sortedImageData);
                     document.getElementById("image-list-container").innerHTML = imageTable;
 
-                    initSortTable(document.querySelector('table'))
+                    initSortTable(document.querySelector('table'));
 
                     getImageInfoButton.disabled = false;
                 });
