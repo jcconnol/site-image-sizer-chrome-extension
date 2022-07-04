@@ -3,6 +3,14 @@ chrome.runtime.onMessage.addListener(
         var popupArrayResponse = [];
 
         var imageArray = document.getElementsByTagName("img");
+
+        //Add og:image
+        var ogImage = document.querySelector("meta[property='og:image']");
+
+        if (ogImage) {
+            popupArrayResponse.push(ogImage.content);
+        }
+
         var imageArrayLen = imageArray.length;
 
         for(var i = 0; i < imageArrayLen; i++){
@@ -51,6 +59,13 @@ chrome.runtime.onMessage.addListener(
                         });
                     }
                 }
+            }
+        }
+
+        for (var i=popupArrayResponse.length; i--;) {
+            if (popupArrayResponse[i].indexOf("bat.bing")>=0){
+                popupArrayResponse.splice(i, 1)
+                break;
             }
         }
 
